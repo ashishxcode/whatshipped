@@ -157,7 +157,8 @@ const gen = cli(['generate', '2026-06', '--no-fetch'])
 check('generate alias works', gen.code, 0)
 check('generate alias matches default', /20 changes/.test(gen.out), true)
 check('bare generate defaults to this month', cli(['generate', '--no-fetch']).code, 0)
-check('--version prints', cli(['--version']).out.trim(), '0.1.0')
+const pkgVersion = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version
+check('--version matches package.json', cli(['--version']).out.trim(), pkgVersion)
 
 rmSync(root, { recursive: true, force: true })
 console.log(failures ? `\n${failures} check(s) failed\n` : '\nall checks passed\n')
