@@ -1,3 +1,14 @@
+<p align="center">
+  <img src="assets/banner.png" alt="whatshipped — turn messy commits into a delivery report" width="100%">
+</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/whatshipped"><img src="https://img.shields.io/npm/v/whatshipped?color=6b46ff" alt="npm version"></a>
+  <a href="https://github.com/ashishxcode/whatshipped/actions/workflows/ci.yml"><img src="https://github.com/ashishxcode/whatshipped/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <img src="https://img.shields.io/badge/dependencies-0-brightgreen" alt="zero dependencies">
+  <img src="https://img.shields.io/node/v/whatshipped" alt="node version">
+</p>
+
 # whatshipped
 
 **What shipped last month?** Answer it in one command, across every service you run.
