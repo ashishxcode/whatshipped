@@ -190,6 +190,14 @@ Two details that are easy to get wrong and are handled here:
   from the *current clock*, which silently drags commits across month boundaries.
 - Dates print with `--date=short-local`, the same zone git filtered in, so a
   commit never displays a date outside the month it was counted in.
+- Months are bounded in **your local timezone**. A commit made at 00:30 IST on
+  1 June is 31 May in UTC, so a teammate in another zone can see a
+  boundary commit land in the adjacent month. If a distributed team needs
+  byte-identical reports, pin it:
+
+  ```bash
+  TZ=UTC whatshipped last
+  ```
 
 ## Releasing
 

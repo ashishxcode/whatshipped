@@ -23,14 +23,20 @@ const check = (label, actual, expected) => {
   console.log(`${ok ? '  ok  ' : '  FAIL'} ${label}${ok ? '' : ` — expected ${expected}, got ${actual}`}`)
 }
 
+// Month boundaries are evaluated in the local timezone, so the test pins TZ.
+// Without this it passes in IST and fails on a UTC runner, or vice versa.
+const TZ = 'UTC'
+
 const git = (cwd, args, env = {}) =>
-  execFileSync('git', args, { cwd, encoding: 'utf8', env: { ...process.env, ...env }, stdio: ['ignore', 'pipe', 'ignore'] })
+  execFileSync('git', args, {
+    cwd, encoding: 'utf8', env: { ...process.env, TZ, ...env }, stdio: ['ignore', 'pipe', 'ignore'],
+  })
 
 // The CLI prints its UI to stderr and report markdown to stdout, so both
 // streams matter to a test.
 const cli = (args, cwd = run) => {
   const r = spawnSync(process.execPath, [CLI, ...args], {
-    cwd, encoding: 'utf8', env: { ...process.env, NO_COLOR: '1' },
+    cwd, encoding: 'utf8', env: { ...process.env, TZ, NO_COLOR: '1' },
   })
   return { out: `${r.stdout || ''}${r.stderr || ''}`, code: r.status }
 }
@@ -57,21 +63,21 @@ execFileSync('mkdir', ['-p', run])
 
 // Month edges are the thing most likely to silently break.
 repo('billing-api', 'main', [
-  ['2026-05-31T23:50:00+05:30', 'FEAT: excluded, belongs to May'],
-  ['2026-06-01T00:30:00+05:30', 'FEAT: included, first minute of June'],
-  ['2026-06-10T12:00:00+05:30', 'FEAT: Shared Launch'],
-  ['2026-06-12T12:00:00+05:30', 'FIX: patch a thing (#12)'],
-  ['2026-06-20T12:00:00+05:30', 'Revert "FEAT: Shared Launch"'],
-  ['2026-06-30T23:59:00+05:30', 'FEAT: included, last minute of June'],
-  ['2026-07-01T00:10:00+05:30', 'FIX: excluded, belongs to July'],
+  ['2026-05-31T23:50:00+00:00', 'FEAT: excluded, belongs to May'],
+  ['2026-06-01T00:30:00+00:00', 'FEAT: included, first minute of June'],
+  ['2026-06-10T12:00:00+00:00', 'FEAT: Shared Launch'],
+  ['2026-06-12T12:00:00+00:00', 'FIX: patch a thing (#12)'],
+  ['2026-06-20T12:00:00+00:00', 'Revert "FEAT: Shared Launch"'],
+  ['2026-06-30T23:59:00+00:00', 'FEAT: included, last minute of June'],
+  ['2026-07-01T00:10:00+00:00', 'FIX: excluded, belongs to July'],
 ])
 repo('web-dashboard', 'main', [
-  ['2026-06-10T09:00:00+05:30', 'FEAT: Shared Launch'],
-  ['2026-06-15T09:00:00+05:30', 'chore: update deps'],
-  ['2026-06-18T09:00:00+05:30', 'FIX: rotate stale API key'],
+  ['2026-06-10T09:00:00+00:00', 'FEAT: Shared Launch'],
+  ['2026-06-15T09:00:00+00:00', 'chore: update deps'],
+  ['2026-06-18T09:00:00+00:00', 'FIX: rotate stale API key'],
 ])
 repo('marketing-site', 'production', [
-  ['2026-06-05T09:00:00+05:30', 'migrate: move to new host'],
+  ['2026-06-05T09:00:00+00:00', 'migrate: move to new host'],
 ])
 
 cli(['init', work, '--scan', '-y'])
