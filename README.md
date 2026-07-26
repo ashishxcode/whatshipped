@@ -32,16 +32,35 @@ npm link          # or just: node bin/cli.js
 
 ## Setup
 
-Point it at wherever you keep your checkouts:
-
 ```bash
-whatshipped init ~/work --scan --org your-github-org
+whatshipped init
 ```
 
-That walks the directory, finds every git checkout, works out which remote
-branch is actually live for each one, and writes a ready-to-use
-`whatshipped.json`. Repos with no commits in the last 12 months are left
-out. Review the file, then:
+Interactive. It scans the current directory (or one you name), finds every git
+checkout, works out which remote branch is actually live for each, and lets you
+tick services in or out before writing `whatshipped.json`:
+
+```
+✓ found 9 checkouts under ~/work
+
+Which services belong in the report? (9 found)
+  ✓  1. billing-api      · origin/main · last commit 2026-07-25
+  ✓  2. web-dashboard    · origin/main · last commit 2026-07-18
+  ○  3. legacy-admin     · origin/main · last commit 2025-11-02
+
+  enter = accept  ·  all  ·  none  ·  1,3 = keep only these  ·  -2 = drop #2
+```
+
+Scanning goes 3 levels deep by default, so nested layouts (`~/work/forked/api`)
+are found too — tune with `--depth`. Repos idle for over a year are skipped.
+
+Prefer no prompts?
+
+```bash
+whatshipped init ~/work --scan -y --org your-github-org
+```
+
+Then:
 
 ```bash
 whatshipped last
@@ -143,6 +162,19 @@ First run seeds all three from the data: cross-service launches become draft
 headline rows, and Risks is populated from detected reverts, restores and
 API-key/rate-limit churn.
 
+## Privacy
+
+Everything runs locally, against clones you already have.
+
+- No telemetry, no analytics, no phone-home. The only network traffic is
+  `git fetch` against your own remotes — skip even that with `--no-fetch`.
+- Nothing is sent to any third party, including any AI service.
+- Your `whatshipped.json` holds repo names and local paths. Generated reports
+  contain commit subjects, PR numbers and dates — treat them as internal
+  documents, and check before pasting one into a public issue or blog post.
+- `whatshipped init` offers to add `whatshipped.json` and `reports/` to your
+  `.gitignore` so neither is committed by accident.
+
 ## What counts
 
 - **Shipped** = a non-merge commit on the service's live branch inside the window.
@@ -168,4 +200,6 @@ lib/scan.js     workspace scanning and live-branch detection
 lib/git.js      git plumbing — resolve, fetch, log a window
 lib/analyze.js  classification, themes, risk signals, rollups
 lib/render.js   markdown, and the narrative-preservation logic
+lib/prompt.js   dependency-free prompts for interactive setup
+lib/ui.js       colour, spinner, symbols (honours NO_COLOR and CI)
 ```
