@@ -10,6 +10,7 @@
     "node": ">=18"
   },
   "scripts": {
+    "test": "node test/smoke.js",
     "report": "node bin/cli.js"
   },
   "license": "MIT",
@@ -41,5 +42,9 @@
   "bugs": {
     "url": "https://github.com/ashishxcode/whatshipped/issues"
   },
-  "homepage": "https://github.com/ashishxcode/whatshipped#readme"
+  "homepage": "https://github.com/ashishxcode/whatshipped#readme",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  }
 }

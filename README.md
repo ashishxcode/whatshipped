@@ -191,6 +191,27 @@ Two details that are easy to get wrong and are handled here:
 - Dates print with `--date=short-local`, the same zone git filtered in, so a
   commit never displays a date outside the month it was counted in.
 
+## Releasing
+
+CI runs the smoke test on Node 18/20/22 across Linux and macOS for every push.
+
+Publishing is done by GitHub Actions, not from a laptop — which also sidesteps
+npm's one-time-password prompt:
+
+```bash
+npm version patch     # or minor / major
+git push --follow-tags
+```
+
+The tag triggers `.github/workflows/release.yml`, which re-runs the tests,
+checks the tag matches `package.json`, publishes with provenance, and opens a
+GitHub release.
+
+Auth is either npm [Trusted Publishing](https://docs.npmjs.com/trusted-publishers)
+(configure this repo + `release.yml` as a trusted publisher on npmjs.com — no
+secret needed) or an `NPM_TOKEN` repository secret holding an npm automation
+token.
+
 ## Layout
 
 ```

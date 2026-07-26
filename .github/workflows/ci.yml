@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        node: [18, 20, 22]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      # git identity is required by the test, which builds throwaway repos
+      - name: Configure git
+        run: |
+          git config --global user.email "ci@example.com"
+          git config --global user.name "CI"
+          git config --global init.defaultBranch main
+
+      - name: Syntax check
+        run: for f in bin/cli.js lib/*.js test/*.js; do node --check "$f"; done
+
+      - name: Smoke test
+        run: npm test
+
+      - name: Verify the packed tarball installs and runs
+        run: |
+          npm pack
+          npm install -g ./whatshipped-*.tgz
+          whatshipped --version
+          whatshipped --help > /dev/null
