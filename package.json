@@ -1,6 +1,6 @@
 {
   "name": "whatshipped",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Turn the git history of every service you ship into a stakeholder-ready delivery report",
   "type": "module",
   "bin": {
