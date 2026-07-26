@@ -118,6 +118,13 @@ whatshipped 2026-07              # a specific month
 whatshipped 2026-01..2026-07     # a range, with a month-by-month breakdown
 ```
 
+`generate` is an alias for the same thing, if you prefer the verb:
+
+```bash
+whatshipped generate             # this month
+whatshipped generate last        # last month
+```
+
 | Option | Effect |
 | --- | --- |
 | `-o, --out <file>` | output path (default `./reports/shipped-<period>.md`) |

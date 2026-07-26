@@ -18,6 +18,7 @@ ${c.bold('whatshipped')} ${c.grey('— what went live, across every service you 
 
 ${c.bold('USAGE')}
   whatshipped ${c.grey('[period] [options]')}
+  whatshipped generate ${c.grey('[period] [options]')}   ${c.grey('same thing, spelled out')}
   whatshipped init ${c.grey('[dir] [options]')}
 
 ${c.bold('PERIOD')}
@@ -94,8 +95,11 @@ function parseArgs(argv) {
     else if (a.startsWith('-')) throw new Error(`unknown option: ${a}\n  run \`whatshipped --help\``)
     else positional.push(a)
   }
+  // `generate` is an explicit alias for the default action, so both
+  // `whatshipped last` and `whatshipped generate last` read naturally.
+  const isGenerate = positional[0] === 'generate'
   opts.command = positional[0] === 'init' ? 'init' : 'report'
-  opts.period = opts.command === 'init' ? null : positional[0]
+  opts.period = opts.command === 'init' ? null : positional[isGenerate ? 1 : 0]
   opts.scanDir = opts.command === 'init' ? positional[1] : null
   return opts
 }

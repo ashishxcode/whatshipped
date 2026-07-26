@@ -116,6 +116,11 @@ check('bad period exits non-zero', bad.code, 1)
 check('bad period explains itself', /use YYYY-MM/.test(bad.out), true)
 check('backwards range rejected', /runs backwards/.test(cli(['2026-07..2026-01']).out), true)
 check('unknown flag rejected', cli(['--nope']).code, 1)
+
+const gen = cli(['generate', '2026-06', '--no-fetch'])
+check('generate alias works', gen.code, 0)
+check('generate alias matches default', /9 changes/.test(gen.out), true)
+check('bare generate defaults to this month', cli(['generate', '--no-fetch']).code, 0)
 check('--version prints', cli(['--version']).out.trim(), '0.1.0')
 
 rmSync(root, { recursive: true, force: true })
