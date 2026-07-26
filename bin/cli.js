@@ -3,7 +3,7 @@ import { execFileSync } from 'node:child_process'
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 
-import { addMonth, monthRange } from '../lib/analyze.js'
+import { addMonth, dedupe, isArtefact, isFeature, monthRange } from '../lib/analyze.js'
 import {
   GLOBAL_CONFIG, expandHome, findConfig, loadConfig, openCommand, writeConfig,
 } from '../lib/config.js'
@@ -256,12 +256,13 @@ function runReport(opts) {
   log.hint(configPath)
   log.blank()
 
-  const isFeature = (subject) => new RegExp(config.featurePattern, 'i').test(subject)
+  const featurePattern = new RegExp(config.featurePattern, 'i')
   const since = `${start}-01`
   const before = `${addMonth(end)}-01`
   const commits = []
   const statuses = new Map()
   const results = []
+  let dropped = 0
 
   const spin = spinner('starting')
   for (const entry of entries) {
@@ -281,8 +282,11 @@ function runReport(opts) {
       spin.line(`${c.yellow(sym.warn)} ${name} ${c.grey(`— branch "${wanted}" not found`)}`)
       continue
     }
-    const found = commitsInWindow(path, branch.ref, since, before)
-      .map((cm) => ({ ...cm, repo: name, feature: isFeature(cm.subject) }))
+    const all = commitsInWindow(path, branch.ref, since, before)
+      .map((cm) => ({ ...cm, repo: name, feature: isFeature(cm.subject, featurePattern) }))
+    const real = all.filter((cm) => !isArtefact(cm.subject))
+    const found = dedupe(real)
+    dropped += (all.length - real.length) + (real.length - found.length)
     commits.push(...found)
     statuses.set(name, { state: 'ok', ref: branch.ref })
     results.push({ name, total: found.length, features: found.filter((f) => f.feature).length, ref: branch.ref })
@@ -297,6 +301,10 @@ function runReport(opts) {
       + `${String(r.total).padStart(countW)} ${(r.total === 1 ? 'change ' : 'changes')}  `
       + `${c.grey(`${r.features} feat`.padEnd(8))} ${c.grey(r.ref)}`,
     )
+  }
+
+  if (dropped) {
+    log.hint(`${dropped} skipped — autosquash markers and duplicate cherry-picks`)
   }
 
   if (!commits.length) {

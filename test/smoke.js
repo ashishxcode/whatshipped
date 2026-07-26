@@ -80,11 +80,31 @@ repo('marketing-site', 'production', [
   ['2026-06-05T09:00:00+00:00', 'migrate: move to new host'],
 ])
 
+// The decoration and noise real commit logs actually contain.
+repo('edge-cases', 'main', [
+  ['2026-06-02T09:00:00+00:00', '✨ feat: emoji-prefixed feature'],
+  ['2026-06-03T09:00:00+00:00', ':sparkles: feat: shortcode-prefixed feature'],
+  ['2026-06-04T09:00:00+00:00', '[FEAT] bracket-tagged feature'],
+  ['2026-06-05T09:00:00+00:00', 'FEAT : space before the colon'],
+  ['2026-06-06T09:00:00+00:00', 'feat(api)!: breaking change to the api'],
+  ['2026-06-07T09:00:00+00:00', 'FEAT: pipes | in | the | subject'],
+  ['2026-06-08T09:00:00+00:00', 'fixup! feat: a leftover autosquash marker'],
+  ['2026-06-09T09:00:00+00:00', 'Merge pull request #99 from org/feat/squash-merged-work'],
+  ['2026-06-10T09:00:00+00:00', 'Revert "Revert \"FEAT: re-landed after a revert\""'],
+  ['2026-06-11T09:00:00+00:00', 'FEAT: cherry-picked twice'],
+  ['2026-06-11T09:00:00+00:00', 'FEAT: cherry-picked twice'],
+  ['2026-06-14T09:00:00+00:00', 'FEAT: Shipped Then Pulled'],
+  ['2026-06-16T09:00:00+00:00', 'Revert "FEAT: Shipped Then Pulled"'],
+])
+
 cli(['init', work, '--scan', '-y'])
 const first = cli(['2026-06', '--no-fetch'])
 check('run exits 0', first.code, 0)
-check('change count', /9 changes/.test(first.out), true)
-check('feature count', /5 features/.test(first.out), true)
+// hand-counted from the fixtures above: 20 kept (13 features, 7 fixes),
+// 2 dropped (one fixup! marker, one duplicate cherry-pick)
+check('change count', /20 changes/.test(first.out), true)
+check('feature count', /13 features/.test(first.out), true)
+check('drops are reported, not silent', /2 skipped/.test(first.out), true)
 
 const report = readFileSync(join(run, 'reports', 'shipped-2026-06.md'), 'utf8')
 check('May commit excluded', report.includes('belongs to May'), false)
@@ -111,6 +131,22 @@ cli(['2026-06', '--no-fetch', '--repos', 'billing-api'])
 const full = readFileSync(join(run, 'reports', 'shipped-2026-06.md'), 'utf8')
 check('full report untouched by filtered run', full.includes('web-dashboard'), true)
 
+// --- commit-message edge cases -------------------------------------------
+const edge = readFileSync(join(run, 'reports', 'shipped-2026-06.md'), 'utf8')
+check('emoji prefix still a feature', /emoji-prefixed feature/.test(edge), true)
+check('shortcode prefix still a feature', /shortcode-prefixed feature/.test(edge), true)
+check('bracket tag still a feature', /bracket-tagged feature/.test(edge), true)
+check('space before colon still a feature', /space before the colon/.test(edge), true)
+check('breaking change flagged', /breaking change to the api.*⚠ breaking/.test(edge), true)
+check('pipes escaped, table intact', edge.includes('pipes \\| in \\| the \\| subject'), true)
+check('fixup! artefact dropped', /leftover autosquash/.test(edge), false)
+// squash merges carry the whole change — dropping them would lose real work
+check('squash-merge commit kept', /squash-merged-work/.test(edge), true)
+check('revert-of-revert kept as a re-land', /re-landed after a revert/.test(edge), true)
+check('duplicate cherry-pick collapsed', (edge.match(/cherry-picked twice/g) || []).length, 2)
+check('shipped-then-reverted paired', /Shipped then reverted in the same window/.test(edge), true)
+check('breaking risk section', /Breaking changes/.test(edge), true)
+
 const bad = cli(['2026-6'])
 check('bad period exits non-zero', bad.code, 1)
 check('bad period explains itself', /use YYYY-MM/.test(bad.out), true)
@@ -119,7 +155,7 @@ check('unknown flag rejected', cli(['--nope']).code, 1)
 
 const gen = cli(['generate', '2026-06', '--no-fetch'])
 check('generate alias works', gen.code, 0)
-check('generate alias matches default', /9 changes/.test(gen.out), true)
+check('generate alias matches default', /20 changes/.test(gen.out), true)
 check('bare generate defaults to this month', cli(['generate', '--no-fetch']).code, 0)
 check('--version prints', cli(['--version']).out.trim(), '0.1.0')
 
