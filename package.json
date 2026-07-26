@@ -1,0 +1,45 @@
+{
+  "name": "whatshipped",
+  "version": "0.1.0",
+  "description": "Turn the git history of every service you ship into a stakeholder-ready delivery report",
+  "type": "module",
+  "bin": {
+    "whatshipped": "./bin/cli.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "report": "node bin/cli.js"
+  },
+  "license": "MIT",
+  "keywords": [
+    "changelog",
+    "release-notes",
+    "git",
+    "report",
+    "engineering",
+    "delivery",
+    "monorepo",
+    "cli",
+    "monthly-report",
+    "release",
+    "standup",
+    "retro"
+  ],
+  "files": [
+    "bin",
+    "lib",
+    "whatshipped.example.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ashishxcode/whatshipped.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ashishxcode/whatshipped/issues"
+  },
+  "homepage": "https://github.com/ashishxcode/whatshipped#readme"
+}

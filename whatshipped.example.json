@@ -1,0 +1,19 @@
+{
+  "//": "Example config. Copy to whatshipped.json and edit, or generate one with `whatshipped init <dir> --scan`.",
+  "//org": "used to clone services you have not checked out yet",
+  "org": "your-github-org",
+  "//defaultBranch": "the branch that means 'this is in production'",
+  "defaultBranch": "origin/main",
+  "//workspace": "where your checkouts live — searchPaths and cloneInto are relative to this",
+  "workspace": "~/work",
+  "searchPaths": [".", "forked"],
+  "cloneInto": ".",
+  "//repos": "name is the GitHub repo name. Optional per-repo overrides: branch, path.",
+  "repos": [
+    { "name": "billing-api" },
+    { "name": "web-dashboard" },
+    { "name": "worker" },
+    { "name": "marketing-site", "branch": "upstream/production" },
+    { "name": "legacy-admin", "path": "~/other/place/legacy-admin" }
+  ]
+}
